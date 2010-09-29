@@ -1,18 +1,21 @@
 <?php
 
-/* This will be the voting file. That is, it handles requests for songs.
+/* This will be the voting file. That is, it handles recommendations for songs.
 
-When someone votes a song, it will store all the relevant information of that vote: time, ip, library, song.
+Function:
+    
+    -When someone votes a song, it will store the vote.
 
-The voting will not be done directly with this file. Using ajax, we'll do it.
+The voting will not be done directly with this file. Using ajax, I'll do it.
 
 Required:
-    lib         :library id
-    song_id     :song id
+    lib         :library id -- a passphrase or some other identifier, haven't decided which
+    song_id     :song id -- again, some sort of identifier, haven't decided how
 Returns:
     0           :vote counted
-    1           :error, didn't receive proper arguments
+    1           :error, database update error
     2           :can't vote due to constraints
+    3           :parameters not set
 */
 
 if (isset($_POST['lib']) && isset($_POST['song_id']))
@@ -23,13 +26,43 @@ if (isset($_POST['lib']) && isset($_POST['song_id']))
     */
 
     require_once "connection.php";
+    require_once "variables.php";
+    require_once "general.php";
 
     $ip=$_SERVER['REMOTE_ADDR'];
+    $lib = $_POST['lib'];
+    $song_id = $_POST['song_id'];
 
+    $criteria = array("lib_info.id" => $lib_id, "song.id" => $song_id, "song.votes.ip_addr" => $ip);
+    $obj = $db->LIBRARY->findOne($criteria);
+    if (is_null($obj))
+    {
+        //Add a vote for that song
+        $criteria = array("lib_info.id" => $lib_id, "song.id" => $song_id);
+        $change = array("$addToSet" => array( "song.votes.ip_addr" => $ip ) );
+        $db->LIBRARY->update($criteria, $change, array("safe"=>true));
+        
+        //Check if ip was added = successful vote
+        if (is_null(get_value(lastError(), "err")))
+        {
+            echo 0;
+            exit;
+        }
+        else
+        {
+            echo 1;
+            exit;
+        }
+    }
+    else
+    {
+        echo 2;
+        exit;
+    }
 }
 else
 {
-    echo 1;
+    echo 3;
     exit;
 }
 ?>
