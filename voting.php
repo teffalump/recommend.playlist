@@ -39,7 +39,7 @@ if (isset($_POST['lib']) && isset($_POST['song_id']))
     {
         //Add a vote for that song
         $criteria = array("lib_info.id" => $lib_id, "song.id" => $song_id);
-        $change = array("$addToSet" => array( "song.votes.ip_addr" => $ip ) );
+        $change = array("$addToSet" => array( "song" => array("votes" => array("ip_addr" => $ip ))));
         $db->LIBRARY->update($criteria, $change, array("safe"=>true));
         
         //Check if ip was added = successful vote

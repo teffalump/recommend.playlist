@@ -113,7 +113,7 @@ if (!empty($_FILES["playlist"]) && ($_FILES["playlist"]["error"] == 0 ) && isset
                 die("Failed to open file");
             }
         xml_parser_free($xml_parser);
-        fclose($fp);
+        fclose($file);
         unlink($_FILES["playlist"]["tmp_name"]);
         unset($_FILES["playlist"]);
 
@@ -134,13 +134,15 @@ if (!empty($_FILES["playlist"]) && ($_FILES["playlist"]["error"] == 0 ) && isset
         $criteria = array("lib_info.id" => $library_id);
         foreach ($track_array as $i)
             $song_info = array(
-                "song.title" => $i["title"], 
-                "song.album" => $i["album"], 
-                "song.artist" => $i["artist"], 
-                "song.location" => $i["location"],
-                "song.id" => substr(md5($i["title"] . $i["album"] . $i["artist"] . $i["location"]), 0, 10)
-                );
-            $criteria["song.id"] = $song_info["song.id"];
+                "song" => array(
+                    "title" => $i["title"], 
+                    "album" => $i["album"], 
+                    "artist" => $i["artist"], 
+                    "location" => $i["location"],
+                    "id" => substr(md5($i["title"] . $i["album"] . $i["artist"] . $i["location"]), 0, 10)
+                    )
+                )
+            $criteria["song.id"] = $song_info["song"]["id"];
             $obj = $db->LIBRARY->findOne($criteria);
             if (is_null($obj))
                 {
@@ -151,7 +153,7 @@ if (!empty($_FILES["playlist"]) && ($_FILES["playlist"]["error"] == 0 ) && isset
                 {
                     $error_code = 1;
                 }
-        $db->close();
+        $connection->close();
         ####### END DATABASE INSERT #######
 
         echo $error_code;
