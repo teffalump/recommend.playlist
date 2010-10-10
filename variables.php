@@ -4,6 +4,5 @@
 
 define ("DATABASE", ""); //name of database for txt2rec
 define ("LIBRARY", "libraries"); //name of collection for libraries for txt2rec
-
+define ("MAX_PLAYLIST_SIZE", 500000); //maximum filesize of playlist (in bytes)
 ?>
-

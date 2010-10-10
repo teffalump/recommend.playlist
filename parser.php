@@ -2,15 +2,47 @@
 
 /* 
     Parser -- this will parse the playlist and put the info in the database
+    Requires:
+        library_id      :library id from POST
+        playlist        :array info of file
+    Returns:
+        0       :songs inserted
+        1       :error inserting songs into database
+        2       :file too big
+        3       :not xml file
 */
 
-if (!empty($_FILES["playlist"]) && ($_FILES["playlist"]["error"] == 0 ))
+if (!empty($_FILES["playlist"]) && ($_FILES["playlist"]["error"] == 0 ) && isset($_POST["library_id"]))
     {
        /*
-        XSPF parser done.
-
-        Still need to do size and type check on upload file.
+        XSPF parser.
+            3 parts:
+                -Check that uploaded file is not too big and it's an xml file
+                -Parse xml file to extract song information
+                -Insert info into database
        */
+       ######### FILE TYPE AND SIZE #######
+       require_once "variables.php";
+
+       if ((filesize($_FILES["playlist"]["tmp_name"]) > MAX_PLAYLIST_SIZE))
+            {
+                echo 2;
+                exit;
+            }
+       else
+            {
+                if ($finfo = finfo_open(FILEINFO_MIME_TYPE))
+                    {
+                        $mime = finfo_file($finfo, $_FILES["playlist"]["tmp_name"];
+                        finfo_close($finfo);
+                        if ($mime !== "application/xml")
+                            {
+                                echo 3;
+                                exit;
+                            }
+                    }
+            }
+       ######### END FILE TYPE AND SIZE #######
        ######### XSPF PARSER ########
        $xspf_paths = array(
             "track_Start" => array("PLAYLIST", "TRACKLIST", "TRACK"),
@@ -64,7 +96,7 @@ if (!empty($_FILES["playlist"]) && ($_FILES["playlist"]["error"] == 0 ))
         $xml_parser = xml_parser_create();
         xml_set_element_handler($xml_parser, "startTag", "endTag");
         xml_set_character_data_handler($xml_parser, "contents");
-        
+
         $file = @fopen($_FILES["playlist"]["tmp_name"], "r");
         if ($file)
             {
@@ -76,10 +108,52 @@ if (!empty($_FILES["playlist"]) && ($_FILES["playlist"]["error"] == 0 ))
                                 }
                     }
             }
-
+        else
+            {
+                die("Failed to open file");
+            }
         xml_parser_free($xml_parser);
         fclose($fp);
+        unlink($_FILES["playlist"]["tmp_name"]);
+        unset($_FILES["playlist"]);
 
        ####### END XSPF PARSER #########
+       ####### START DATABASE INSERT #######
+       /* Put songs into right library
+        * --Add songs to an existing library
+        * --Check for: 
+        *       - song doesn't already exist
+        *           --> search for same song.id: first 10 characters of md5 of (title + album + artist + location)
+        */
+        require_once "connection.php";
+        require_once "general.php";
+
+        $error_code=0;
+
+        $library_id = $_POST["library_id"];
+        $criteria = array("lib_info.id" => $library_id);
+        foreach ($track_array as $i)
+            $song_info = array(
+                "song.title" => $i["title"], 
+                "song.album" => $i["album"], 
+                "song.artist" => $i["artist"], 
+                "song.location" => $i["location"],
+                "song.id" => substr(md5($i["title"] . $i["album"] . $i["artist"] . $i["location"]), 0, 10)
+                );
+            $criteria["song.id"] = $song_info["song.id"];
+            $obj = $db->LIBRARY->findOne($criteria);
+            if (is_null($obj))
+                {
+                    unset($criteria["song.id"]);
+                    $db->LIBRARY->update($criteria, $song_info, array("safe" => TRUE));
+                }
+            if (!is_null(get_value(lastError(), "err")))
+                {
+                    $error_code = 1;
+                }
+        $db->close();
+        ####### END DATABASE INSERT #######
+
+        echo $error_code;
      }
 ?>
