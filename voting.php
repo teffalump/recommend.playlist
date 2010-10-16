@@ -33,14 +33,18 @@ if (isset($_POST['lib']) && isset($_POST['song_id']))
     $lib = $_POST['lib'];
     $song_id = $_POST['song_id'];
 
-    $criteria = array("lib_info.id" => $lib_id, "song.id" => $song_id, "song.votes.ip_addr" => $ip);
-    $obj = $db->LIBRARY->findOne($criteria);
+    $criteria = array("lib_id" => $lib_id, "id" => $song_id, "ip_addr" => $ip);
+    $obj = $db->SONG->findOne($criteria);
     if (is_null($obj))
     {
-        //Add a vote for that song
-        $criteria = array("lib_info.id" => $lib_id, "song.id" => $song_id);
-        $change = array("$addToSet" => array( "song" => array("votes" => array("ip_addr" => $ip ))));
-        $db->LIBRARY->update($criteria, $change, array("safe"=>true));
+        //Add a vote for that song and increment total number of votes
+        unset($criteria["ip_addr"]);
+        $change = array("$addToSet" => 
+                            array("ip_addr" => $ip ) 
+                        "$inc" => 
+                            array("votes" => 1)
+                                );
+        $db->SONG->update($criteria, $change, array("safe"=>true));
         
         //Check if ip was added = successful vote
         if (is_null(get_value(lastError(), "err")))

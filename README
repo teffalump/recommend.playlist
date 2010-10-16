@@ -1,6 +1,42 @@
 I thought I'd write a website to help people choose playlists for parties. I find it difficult to decide what to play...so why not have the attendees choose? Consequently, the site should have a list of available songs and the people should vote for certain songs. Not terribly complicated, but fun to write. I'll do it slowly because I don't have all that much free time. I could probably just use a pre-written voting system, but I'd like to write all of it myself.
 
+It goes without saying that I suck at organizing what I need...so I'm just writing shit that hopefully works - whether I need the stuff, I need to audit myself or something, lol.
+
 
 The parser is finished, and so is the voting system. Probably will have to modify them but the basics are done.
 
 Now I need to display the information. So, I need to do the index.php file. Ajax that shit up. That might take a while as I know very little jQuery but that shouldn't be too hard to learn.
+Collection Library
+    {
+            A document...
+            {
+                id:
+                password_hash:
+                expires:
+                title:
+                descripton:
+            }
+    }
+Collection song
+    {
+            A document....
+            {
+                lib_id:
+                id:
+                metadata
+                    {
+                        identifier:
+                        artist:
+                        album:
+                        title:
+                        location:
+                    }
+                votes:
+                ip_addr:
+                     [ip,ip,ip]
+            }
+    }
+indexes needed for mongo:
+
+db.library.ensureIndex({"id": 1}, {unique: true});
+db.song.ensureIndex({"votes"});

@@ -49,7 +49,8 @@ if (!empty($_FILES["playlist"]) && ($_FILES["playlist"]["error"] == 0 ) && isset
             "track_Artist" => array("PLAYLIST", "TRACKLIST", "TRACK", "CREATOR"),
             "track_Title" => array("PLAYLIST", "TRACKLIST", "TRACK", "TITLE"),
             "track_Album" => array("PLAYLIST", "TRACKLIST", "TRACK", "ALBUM"),
-            "track_Location" => array("PLAYLIST", "TRACKLIST", "TRACK", "LOCATION")
+            "track_Location" => array("PLAYLIST", "TRACKLIST", "TRACK", "LOCATION"),
+            "track_Identifier" => array("PLYLIST", "TRACKLIST", "TRACK", "IDENTIFIER")
             );
 
        $track_array = array();
@@ -79,7 +80,11 @@ if (!empty($_FILES["playlist"]) && ($_FILES["playlist"]["error"] == 0 ) && isset
                         case $xspf_paths["track_Location"]:
                             $track_array[$id]["location"] = $data;
                             break;
-                            
+
+                        case $sxpf_pathsp["track_Identifier"];
+                            $track_array[$id]["identifier"] = $data;
+                            break;
+
                         case $xspf_paths["track_Title"]:
                             $track_array[$id]["title"] = $data;
                             break;
@@ -123,7 +128,7 @@ if (!empty($_FILES["playlist"]) && ($_FILES["playlist"]["error"] == 0 ) && isset
         * --Add songs to an existing library
         * --Check for: 
         *       - song doesn't already exist
-        *           --> search for same song.id: first 10 characters of md5 of (title + album + artist + location)
+        *           --> search for same id and lib_id
         */
         require_once "connection.php";
         require_once "general.php";
@@ -131,27 +136,28 @@ if (!empty($_FILES["playlist"]) && ($_FILES["playlist"]["error"] == 0 ) && isset
         $error_code=0;
 
         $library_id = $_POST["library_id"];
-        $criteria = array("lib_info.id" => $library_id);
+        $criteria = array("lib_id" => $library_id);
         foreach ($track_array as $i)
             $song_info = array(
-                "song" => array(
-                    "title" => $i["title"], 
-                    "album" => $i["album"], 
-                    "artist" => $i["artist"], 
-                    "location" => $i["location"],
-                    "id" => substr(md5($i["title"] . $i["album"] . $i["artist"] . $i["location"]), 0, 10)
-                    )
-                )
-            $criteria["song.id"] = $song_info["song"]["id"];
-            $obj = $db->LIBRARY->findOne($criteria);
+                    "metadata" => array(
+                        "title" => $i["title"], 
+                        "album" => $i["album"], 
+                        "artist" => $i["artist"], 
+                        "location" => $i["location"],
+                        "identifier" => $i["identifier"]
+                        ),
+                    "id" => substr(md5($i["title"] . $i["album"] . $i["artist"]), 0, 10),
+                    "lib_id" => $library_id
+                    );
+            $criteria["id"] = $song_info["id"];
+            $obj = $db->SONG->findOne($criteria);
             if (is_null($obj))
                 {
-                    unset($criteria["song.id"]);
-                    $db->LIBRARY->update($criteria, $song_info, array("safe" => TRUE));
-                }
-            if (!is_null(get_value(lastError(), "err")))
-                {
-                    $error_code = 1;
+                    $db->SONG->save($song_info, array("safe" => TRUE));
+                    if (!is_null(get_value(lastError(), "err")))
+                        {
+                            $error_code = 1;
+                        }
                 }
         $connection->close();
         ####### END DATABASE INSERT #######
