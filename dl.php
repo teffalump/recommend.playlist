@@ -19,11 +19,13 @@ if (isset($_POST["library_id"]) && isset($_POST["number"]))
         ######## RETRIEVE SONGS #######
         $library_id = $_POST["library_id"];
         $limit = $_POST["number"];
-        $criteria = array( "lib_id" => $library_id );
+        $criteria = array( "lib_id" => $library_id,
+                           "votes" => array( '$gt' => 0 )
+                            );
         $fields = array("metadata" => 1,
                         "_id" => 0);
 
-        //Return the songs' metadata sorted by vote total and limited to the top 10,20,30, etc
+        //Return the songs' metadata sorted by vote total (must have at least one vote) and limited to the top 10,20,30, etc
         //This returns a cursor, the query has not actually been processed
         $cursor = $db->SONG->find( $criteria, $fields )->sort(array( "votes" => -1))->limit($limit);
         ####### END RETRIEVE SONGS ###########
@@ -49,19 +51,20 @@ if (isset($_POST["library_id"]) && isset($_POST["number"]))
             }
         echo "\t</tracklist>\n";
         echo "</playlist>";
+
         $content = ob_get_contents();
         ob_end_clean();
+        $connection->close();
 
 
         // We'll be outputting an xspf file
-        // It will be called playlist.xspf
-        // TODO: pipe content, other header shit
         header('Expires: 0');
         header('Content-type: application/xml');
         header('Content-length: ' . strlen($content));
         header('Content-Disposition: attachment; filename="top_{$limit}_playlist.xspf"');
         echo $content;
-        exit;
+        ##### END OUTPUT FILE TO DOWNLOAD #####
 
+        exit;
     }
 ?>

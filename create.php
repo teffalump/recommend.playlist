@@ -1,7 +1,7 @@
 <?php
     /* This file will create a playlist page. Gotta link this with parser, too.
      *
-     *  so, provides an expiration time, passphrase
+     *  so, provide an expiration time, passphrase
      *
      *  Must assert uniqueness of id
      *
