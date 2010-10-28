@@ -40,3 +40,5 @@ indexes needed for mongo:
 
 db.library.ensureIndex({"id": 1}, {unique: true});
 db.song.ensureIndex({"votes"});
+
+I've just thought of something to add - instead of a voting system (which could still be implemented) - I'll just crawl website and pull the songs that are popular, and then find them in the uploaded playlist. The person can then immediately download the playlist with all the hottest songs.
