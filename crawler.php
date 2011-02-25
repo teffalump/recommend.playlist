@@ -27,7 +27,13 @@ $xpath = new DOMXPath($doc);
 $entries = $xpath->query($websites["billboard"]["data"]);
 $dump = $entries->item(0)->nodeValue;
 $a = substr(strstr($dump,'{'), 0,-strlen(strrchr($dump, ';')));
-$b_json=json_decode($a);
+$b_json=json_decode($a,true);
+for($i=0;$i<sizeof($b_json["items"]);$i++)
+    {
+        $billboard_songs[$i]["title"] = $b_json["items"][$i]["title"];
+        $billboard_songs[$i]["artist"] = $b_json["items"][$i]["artist"];
+    }
+unset($b_json);
 // Now in an array
 // Now do something with the data..
 
@@ -42,11 +48,13 @@ foreach ($entries as $entry)
     {
         $songs[]=$entry->attributes->item(2)->value;
     }
-$organized=array();
+$shazam=array();
 for ($i=0;$i<sizeof($songs);$i+=2)
     {
-        $organized[]=array("song"=>$songs[$i],"artist"=>$songs[$i+1]);
+        $shazam[]=array("title"=>$songs[$i],"artist"=>$songs[$i+1]);
     }
 //Now in an array
 //Now do something with the data..
+//Well, I'll merge the arrays and delete duplicates
+$ownage = array_map("unserialize", array_unique(array_map("serialize", array_merge($billboard_songs, $shazam))));
 ?>
