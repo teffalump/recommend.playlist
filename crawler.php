@@ -9,7 +9,7 @@
 
 //Billboard's data is easily extracted from the chart page -- just iterate through all the pages
 //      Also, it is possible to extract it from the json
-//      However, the info is truncated at some legnth
+//      However, the info is truncated at some length
 //      hence, it isn't the best...though it is already formatted in a JSON object
 //      so to do that way = just need to spruce up the text string
 //      to make it available to "json_decode" in php
@@ -64,7 +64,8 @@ for ($i=0;$i<sizeof($artists_dump);$i++)
     {
         $billboard[]=array("title"=>$titles_dump[$i],"artist"=>$artists_dump[$i]);
     }
-
+unset($artists_dump);
+unset($titles_dump);
 ######### END BILLBOARD ########
 #$a = substr(strstr($dump,'{'), 0,-strlen(strrchr($dump, ';')));
 #$b_json=json_decode($a,true);
@@ -91,9 +92,11 @@ for ($i=0;$i<sizeof($songs);$i+=2)
     {
         $shazam[]=array("title"=>$songs[$i],"artist"=>$songs[$i+1]);
     }
+unset($songs);
 ############## END SHAZAM ###############
 
 //Well, I'll merge the arrays and delete duplicates
 $ownage = array_map("unserialize", array_unique(array_map("serialize", array_merge($billboard, $shazam))));
+
 
 ?>
