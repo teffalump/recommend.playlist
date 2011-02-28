@@ -33,7 +33,7 @@ if (!empty($_FILES["playlist"]) && ($_FILES["playlist"]["error"] == 0 ) && isset
             {
                 if ($finfo = finfo_open(FILEINFO_MIME_TYPE))
                     {
-                        $mime = finfo_file($finfo, $_FILES["playlist"]["tmp_name"];
+                        $mime = finfo_file($finfo, $_FILES["playlist"]["tmp_name"]);
                         finfo_close($finfo);
                         if ($mime !== "application/xml")
                             {
@@ -121,14 +121,13 @@ if (!empty($_FILES["playlist"]) && ($_FILES["playlist"]["error"] == 0 ) && isset
         fclose($file);
         unlink($_FILES["playlist"]["tmp_name"]);
         unset($_FILES["playlist"]);
-
-       ####### END XSPF PARSER #########
-       ####### START DATABASE INSERT #######
-       /* Put songs into right library
+      ####### END XSPF PARSER #########
+      /* ####### START DATABASE INSERT #######
+        * Put songs into right library
         * --Check for: 
         *       - song doesn't already exist
         *           --> search for same id and lib_id
-        */
+        *
         require_once "connection.php";
         require_once "general.php";
         require_once "variables.php";
@@ -166,5 +165,6 @@ if (!empty($_FILES["playlist"]) && ($_FILES["playlist"]["error"] == 0 ) && isset
 
         echo $error_code;
         exit;
+        */
      }
 ?>
