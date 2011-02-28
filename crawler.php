@@ -96,7 +96,6 @@ unset($songs);
 ############## END SHAZAM ###############
 
 //Well, I'll merge the arrays and delete duplicates
-$ownage = array_map("unserialize", array_unique(array_map("serialize", array_merge($billboard, $shazam))));
-
-
+$hot_songs = array_map("unserialize", array_unique(array_map("serialize", array_merge($billboard, $shazam))));
+return $hot_songs;
 ?>
