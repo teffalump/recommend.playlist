@@ -78,23 +78,23 @@ if (!empty($_FILES["playlist"]) && ($_FILES["playlist"]["error"] == 0 ) && isset
                 switch ($current_tag)
                     {
                         case $xspf_paths["track_Location"]:
-                            $track_array[$id]["location"] = $data;
+                            $track_array[$id]["location"] .= $data;
                             break;
 
                         case $sxpf_pathsp["track_Identifier"];
-                            $track_array[$id]["identifier"] = $data;
+                            $track_array[$id]["identifier"] .= $data;
                             break;
 
                         case $xspf_paths["track_Title"]:
-                            $track_array[$id]["title"] = $data;
+                            $track_array[$id]["title"] .= $data;
                             break;
 
                         case $xspf_paths["track_Artist"]:
-                            $track_array[$id]["artist"] = $data;
+                            $track_array[$id]["artist"] .= $data;
                             break;
 
                         case $xspf_paths["track_Album"]:
-                            $track_array[$id]["album"] = $data;
+                            $track_array[$id]["album"] .= $data;
                             break;
                      }
              }
